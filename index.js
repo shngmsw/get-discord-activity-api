@@ -1,17 +1,29 @@
 const Discord = require('discord.js');
 const GatewayIntentBits = require('discord.js').GatewayIntentBits;
-const client = new Discord.Client({intents: [
+const
+  Partials
+    = require('discord.js');
+const client = new Discord.Client({
+  intents: [
     GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildModeration,
     GatewayIntentBits.GuildPresences,
-]});
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.MessageContent,
+  ],
+  partials: [Partials.User, Partials.GuildMember, Partials.Message, Partials.Channel, Partials.Reaction],
+});
+
 require('dotenv').config();
 client.login(process.env.DISCORD_BOT_TOKEN);
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-async function getActivity(userId)  {
+async function getActivity(userId) {
   return new Promise((resolve, reject) => {
     client.guilds.cache.forEach(async (guild) => {
       const member = await guild.members.fetch(userId);
@@ -43,4 +55,13 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`listening at ${port}`);
 });
+const { createChannel, createChannelButton } = require('./create_channel');
 
+client.on('messageCreate', async (message) => {
+  console.log('messageCreate');
+  createChannelButton(message);
+});
+client.on('interactionCreate', async (interaction) => {
+  console.log('interactionCreate');
+  createChannel(interaction);
+});
